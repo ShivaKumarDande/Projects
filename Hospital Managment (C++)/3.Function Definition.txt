@@ -1,0 +1,1311 @@
+#include"classHeader.h"
+
+void patientRecord :: addNewPatientRecord()
+{
+	system("cls");
+	ofstream outObj("PatientRecord.bin", ios::app | ios::binary);
+	patientRecord classObj;
+	cout << "\t\t *********************************" << endl << "\t\t\t ENTER PATIENT DETAILS" << endl << "\t\t *********************************"
+		<< endl << endl;
+	cout << "\t\t\tAADHAR NUMBER : ";
+	cin >> classObj.patientId;
+	cout << "\t\t\tFIRST NAME    : ";
+	cin >> classObj.firstName;
+	cout << "\t\t\tLAST NAME     : ";
+	cin >> classObj.lastName;
+	cout << "\t\t\tAGE           : ";
+	cin >> classObj.age;
+	cout << "\t\t\t GENDER"       << endl <<
+			"\t\t\t\t 1. MALE"   << endl <<
+			"\t\t\t\t 2. FEMALE" << endl << 
+			"\t\t\t ENTER YOUR CHOICE (1 OR 2) : ";
+	int gChoice;
+	cin >> gChoice;
+	if (gChoice == 1)
+		strcpy_s(classObj.gender, "MALE");
+	else if(gChoice == 2)
+		strcpy_s(classObj.gender, "FEMALE");
+	cout << "\t\t\tADDRESS   ";
+	cout << "\n\t\t\t\tPLOT NUMBER : ";
+	cin >> classObj.address.plotNumber;
+	cout << "\t\t\t\tROAD NUMBER : ";
+	cin >> classObj.address.roadNumber;
+	cout << "\t\t\t\tCITY        : ";
+	cin >> classObj.address.cityName;
+	cout << "\t\t\t\tSTATE       : ";
+	cin >> classObj.address.state;
+	cout << "\t\t\t\tPIN CODE    : ";
+	cin >> classObj.address.pincode;
+	int dChoice;
+	cout << "\t\t\t---------------------"<< endl <<
+			"\t\t\t||DISEASE          ||"<< endl <<
+		    "\t\t\t|| 1. CARDIOLOGY   ||"<< endl <<
+			"\t\t\t|| 2. ORTHOPEDICS  ||"<< endl << 
+			"\t\t\t|| 3. GYNACOLOGY   ||"<< endl << 
+		    "\t\t\t|| 4. PEDIATRITION ||"<< endl <<
+			"\t\t\t|| 5. ENT          ||"<< endl <<
+			"\t\t\t|| 6. DERMITOLOGY  ||"<< endl <<
+			"\t\t\t|| 7. GASTRO       ||"<< endl <<
+			"\t\t\t---------------------"<< endl <<
+			"\t\t\t YOUR CHIOCE : ";
+	cin >> dChoice;
+	ifstream serviceObj("ServiceRecord.bin", ios :: in | ios :: binary);
+	hospitalServiceRecord hospitalClassObj;
+	while(serviceObj.read((char *)&hospitalClassObj, sizeof(hospitalClassObj)))
+	{
+		if(hospitalClassObj.diseaseId == dChoice)
+		{
+			strcpy_s(classObj.diseaseDescription, hospitalClassObj.diseaseDescription);
+			strcpy_s(classObj.docFirstName, hospitalClassObj.docFirstName);
+			strcpy_s(classObj.docLastName, hospitalClassObj.docLastName);
+			classObj.specialistRoomNumber = hospitalClassObj.specialistRoomNumber;
+			classObj.depositAmount = hospitalClassObj.depositAmount;
+			strcpy_s(classObj.specialisation, hospitalClassObj.specialisation);
+		}
+	}
+	serviceObj.close();
+	int sChoice;
+	cout << "\t\t\tSERVICE TYPE    " << endl <<
+			"\t\t\t\t 1. OPD"        << endl <<
+			"\t\t\t\t 2. EMERGENCY"  << endl <<
+			"\t\t\t YOUR CHOICE : ";
+	cin >> sChoice;
+	if (sChoice == 1)
+		strcpy_s(classObj.serviceType, "OPD");
+	else
+		strcpy_s(classObj.serviceType, "EMERGENCY");
+	//AUTOMATICALLY ASSIGNING THE SYSTEM DATE AS ADMISSION DATE
+	struct tm newtime;
+	time_t now = time(0);
+	localtime_s(&newtime, &now);
+	classObj.admittedDate.day =newtime.tm_mday;
+	classObj.admittedDate.month = 1 + newtime.tm_mon;
+	classObj.admittedDate.year = 1900 + newtime.tm_year;
+	cout << "\t\t\t ROOM ALLOCATED TO MR/MRS." << classObj.firstName << " " << classObj.lastName << " : " << classObj.specialistRoomNumber << endl;
+	cout << "\n\t\t\t DOCTOR NAME : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << endl;
+	cout << "\t\t\t AMOUNT TO BE DEPOSITED : " << classObj.depositAmount << endl;
+	cout << "\t\t\tSUCESSFULLY ADDED THE PATIENT RECORD \n";
+	cout << "\t\t\t PRESS ENTER TO CONTINUE \n";
+	outObj.write((char*)&classObj, sizeof(classObj));
+	outObj.close();
+	_getch();
+	return;
+}
+
+void patientRecord :: displayPatientRecord()
+{
+	system("cls");
+	patientRecord classObj;
+	if (!classObj.admittedPatientFileCheck() && !classObj.dischargedPatientFileCheck())
+	{
+		cout << "\t\t\t NO RECORDS EXISTING TO DISPLAY" << endl << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+		return;
+	}
+	int choice1, choice;
+	label :
+	cout << "\n\t\t\t ENTER"                            << endl <<
+			"\t\t\t 1. TO DISPLAY ADMITTED PATIENTS"   << endl << 
+			"\t\t\t 2. TO DISPLAY DISCHARGED PATIENTS" << endl << 
+			"\t\t\t 3. EXIT"                           << endl <<
+			"\t\t\t YOUR CHOICE : ";
+	cin >> choice1;
+	if (choice1 == 1 && !classObj.admittedPatientFileCheck())
+		{
+			cout << "\t\t\t NO ADMITTED PATIENT RECORDS TO DISPLAY" << endl <<
+					"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			system("cls");
+			goto label;
+		}
+	else if (choice1 == 2 && !classObj.dischargedPatientFileCheck())
+		{
+			cout << "\t\t\t NO DISCHARGED PATIENT RECORDS TO DISPLAY" << endl <<
+					"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			system("cls");
+			goto label;
+		}
+	else if(choice1 == 3)
+		return;
+	system("cls");
+	cout << "\t\t\t 1. DISPLAY ALL PATIENT RECORDS"                   << endl << 
+	 	    "\t\t\t 2. DISPLAY PATIENT RECORDS IN ALPHABETICAL ORDER" << endl <<
+			"\t\t\t 3. DISPLAY O.P.D PATIENT RECORDS"                 << endl <<
+	 	    "\t\t\t 4. DISPLAY EMERGENCY PATIENT RECORDS"             << endl << 
+			"\t\t\t 5. DISPLAY PATIENT RECORDS OF A PARTICULAR DATE"  << endl <<
+	 	    "\t\t\t 6. EXIT"                                          << endl <<
+			"\n\t\t\t ENTER YOUR CHOICE : ";
+	cin >> choice;
+	switch(choice)
+	{
+		case 1:
+			classObj.displayAllPatientRecords(choice1);
+			break;
+		case 2:
+			classObj.alphabeticalOrderDisplay(choice1);
+			break;
+		case 3:
+			classObj.OPDPatientList(choice1);
+			break;
+		case 4:
+			classObj.emergencyPatientList(choice1);
+			break;
+		case 5:
+			classObj.patientListOfParticularDate(choice1);
+			break;
+		case 6:
+			break;
+		default:
+			cout << "\n\t\t\tINVALID CHOICE"<< endl;
+			break;
+	}
+}
+
+void patientRecord :: displayAllPatientRecords(int choice)
+{
+	patientRecord classObj;
+	ifstream inObj;
+	if(choice == 1)
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	else if(choice == 2)	
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	system("cls");
+	cout << "\t\t\t*********************************\n\t\t\t\tALL PATIENTS RECORDS\n\t\t\t*********************************"
+		<< endl << endl;
+	while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+				classObj.lastName << "\n" <<
+				"AGE            : " << classObj.age << "\n" <<
+				"PATIENT ID     : " << classObj.patientId << "\n" <<
+				"GENDER         : " << classObj.gender << "\n" <<
+				"ADDRESS       \n\t" <<
+				"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+				"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+				"CITY         : " << classObj.address.cityName << "\n\t" <<
+				"STATE        : " << classObj.address.state << "\n\t" <<
+				"PIN CODE     : " << classObj.address.pincode << "\n" <<
+			    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+				"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+				"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+				"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n"  <<
+				"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+				"SERVICE TYPE   : " << classObj.serviceType << endl;
+			if(choice == 2)
+				cout << "TREATMENT AMOUNT : " << classObj.treatementAmount << "\n" <<
+					"BALANCE AMOUNT   : " << classObj.balanceAmount << "\n" <<
+					"REFUNDED AMOUNT  : " << classObj.refundAmount << "\n" <<
+					"DISCHARGED DATE  : " << classObj.dischargeDate.day << " " << classObj.dischargeDate.month << " " << classObj.dischargeDate.year << "\n" <<
+					"PAYMENT STATUS   : " << classObj.paymentStatus << "\n" <<
+					"REFUND STATUS    : " << classObj.refundStatus << "\n" << endl;
+			cout << "-------------------------------------------------------------------------------------------" << endl;
+			cout << "\n\t\t\tPRESS ENTER TO DISPLAY THE NEXT RECORD" << endl;
+			_getch();
+		}
+	cout << "\n\t\t\tALL RECORDS ARE DISPLAYED" << endl;
+	cout << "*******************************************************************************************" << endl;
+	inObj.close();
+	cout << "\t\t\tPRESS ENTER TO CONTINUE" << endl;
+	_getch();
+}
+
+void patientRecord :: alphabeticalOrderDisplay(int choice)
+{
+	patientRecord classObj;
+	int count = 0;
+	char name[100][31];
+	char tempName[31], duplicateName[100][31];
+	ifstream inObj;
+	if(choice == 1)
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	else if(choice == 2)	
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	//CONCATENATING FIRST NAME AND LAST NAME OF PATIENTS IN ORDER TO COMPARE.
+	while(inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			strcpy_s(name[count],classObj.firstName);
+			strcat_s(name[count]," ");
+			strcat_s(name[count],classObj.lastName);
+			count++;
+		}
+		inObj.close();
+		//COMPARING EACH AND EVERY NAME AND SORTING THEM INTO ALPHABETICAL ORDER.
+		for(int i = 0; i <= count; i++)
+		{
+			for(int j = i + 1; j <= count; j++)
+			{
+				if(_stricmp(name[i],name[j])>0)
+				{
+					strcpy_s(tempName, name[i]);
+					strcpy_s(name[i], name[j]);
+					strcpy_s(name[j], tempName);
+				}
+			}
+		}
+		system("cls");
+		cout << "\t\t\t*****************************************\n\t\t\t PATIENTS RECORDS IN ALPHABETICAL ORDER\n\t\t\t*****************************************"
+			<< endl << endl;
+		for(int j = 0; j <= count; j++)
+		{
+			if(choice == 1)
+				inObj.open("PatientRecord.bin", ios::in | ios::binary);
+			else if(choice == 2)
+				inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+			while (inObj.read((char*)&classObj, sizeof(classObj)))
+			{
+				strcpy_s(duplicateName[j], classObj.firstName);
+				strcat_s(duplicateName[j], " ");
+				strcat_s(duplicateName[j], classObj.lastName);
+				if(!strcmp(name[j], duplicateName[j]))
+				{
+					cout << "IN THE LOOP" << endl;
+					cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+						classObj.lastName << "\n" <<
+						"AGE            : " << classObj.age << "\n" <<
+						"PATIENT ID     : " << classObj.patientId << "\n" <<
+						"GENDER         : " << classObj.gender << "\n" <<
+						"ADDRESS       \n\t" <<
+						"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+						"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+						"CITY         : " << classObj.address.cityName << "\n\t" <<
+						"STATE        : " << classObj.address.state << "\n\t" <<
+						"PIN CODE     : " << classObj.address.pincode << "\n" <<
+					    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+						"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+						"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+						"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n" <<
+						"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+						"SERVICE TYPE   : " << classObj.serviceType << endl;
+						if(choice == 2)
+							cout << "TREATMENT AMOUNT : " << classObj.treatementAmount << "\n" <<
+								"BALANCE AMOUNT   : " << classObj.balanceAmount << "\n" <<
+								"REFUNDED AMOUNT  : " << classObj.refundAmount << "\n" <<
+								"DISCHARGED DATE  : " << classObj.dischargeDate.day << " " << classObj.dischargeDate.month << " " << classObj.dischargeDate.year << "\n" <<
+								"PAYMENT STATUS   : " << classObj.paymentStatus << "\n" <<
+								"REFUND STATUS    : " << classObj.refundStatus << "\n" << endl;
+					cout << "-------------------------------------------------------------------------------------------" << endl;
+					cout << "\n\t\t\tPRESS ENTER TO DISPLAY THE NEXT RECORD" << endl;
+					_getch();
+					break;
+				}
+			}
+			inObj.close();
+		}
+	cout << "\n\t\t\tALL RECORDS ARE DISPLAYED" << endl;
+	cout << "*******************************************************************************************" << endl;
+	inObj.close();
+	cout << "\t\t\tPRESS ENTER TO CONTINUE" << endl;
+	_getch();
+}
+
+void patientRecord :: OPDPatientList(int choice)
+{
+	bool flag= false;
+	patientRecord classObj;
+	ifstream inObj;
+	if(choice == 1)
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	else if(choice == 2)	
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	system("cls");
+	cout << "\t\t\t******************************************\n\t\t\t\t   OPD PATIENT RECORDS\n\t\t\t******************************************"
+		<< endl << endl;
+	while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if(!(_stricmp(classObj.serviceType,"OPD")))
+			{
+				flag = true;
+					cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+					classObj.lastName << "\n" <<
+					"AGE            : " << classObj.age << "\n" <<
+					"PATIENT ID     : " << classObj.patientId << "\n" <<
+					"GENDER         : " << classObj.gender << "\n" <<
+					"ADDRESS       \n\t" <<
+					"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+					"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+					"CITY         : " << classObj.address.cityName << "\n\t" <<
+					"STATE        : " << classObj.address.state << "\n\t" <<
+					"PIN CODE     : " << classObj.address.pincode << "\n" <<
+				    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+					"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+					"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+					"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n" <<
+					"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+					"SERVICE TYPE   : " << classObj.serviceType << endl;
+					if(choice == 2)
+						cout << "TREATMENT AMOUNT : " << classObj.treatementAmount << "\n" <<
+							"BALANCE AMOUNT   : " << classObj.balanceAmount << "\n" <<
+							"REFUNDED AMOUNT  : " << classObj.refundAmount << "\n" <<
+							"DISCHARGED DATE  : " << classObj.dischargeDate.day << " " << classObj.dischargeDate.month << " " << classObj.dischargeDate.year << "\n" <<
+							"PAYMENT STATUS   : " << classObj.paymentStatus << "\n" <<
+							"REFUND STATUS    : " << classObj.refundStatus << "\n" << endl;
+			
+				cout << "-------------------------------------------------------------------------------------------" << endl;
+				cout << "\n\t\t\tPRESS ENTER TO DISPLAY THE NEXT RECORD" << endl;
+				_getch();
+			}
+		}
+	if(flag)
+		cout << "\n\t\t\tALL OPD RECORDS ARE DISPLAYED" << endl;
+	if(!flag)
+		cout << "\n\t\t\t NO OPD PATIENT RECORDS TO DISPLAY" << endl;
+	cout << "*******************************************************************************************" << endl;
+	inObj.close();
+	cout << "\t\t\tPRESS ENTER TO CONTINUE" << endl;
+	_getch();
+}
+
+void patientRecord :: emergencyPatientList(int choice)
+{
+	bool flag = false;
+	patientRecord classObj;
+	ifstream inObj;
+	if(choice == 1)
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	else if(choice == 2)	
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	system("cls");
+	cout << "\t\t\t*****************************************\n\t\t\t\tEMERGENCY PATIENT RECORDS\n\t\t\t*****************************************"
+		<< endl << endl;
+	while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if(!_stricmp(classObj.serviceType,"EMERGENCY"))
+			{
+				flag = true;
+				cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+					classObj.lastName << "\n" <<
+					"AGE            : " << classObj.age << "\n" <<
+					"PATIENT ID     : " << classObj.patientId << "\n" <<
+					"GENDER         : " << classObj.gender << "\n" <<
+					"ADDRESS       \n\t" <<
+					"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+					"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+					"CITY         : " << classObj.address.cityName << "\n\t" <<
+					"STATE        : " << classObj.address.state << "\n\t" <<
+					"PIN CODE     : " << classObj.address.pincode << "\n" <<
+				    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+					"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+					"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+					"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n" <<
+					"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+					"SERVICE TYPE   : " << classObj.serviceType << endl;
+						if(choice == 2)
+							cout << "TREATMENT AMOUNT : " << classObj.treatementAmount << "\n" <<
+								"BALANCE AMOUNT   : " << classObj.balanceAmount << "\n" <<
+								"REFUNDED AMOUNT  : " << classObj.refundAmount << "\n" << 
+								"DISCHARGED DATE  : " << classObj.dischargeDate.day << " " << classObj.dischargeDate.month << " " << classObj.dischargeDate.year << "\n" <<
+								"PAYMENT STATUS   : " << classObj.paymentStatus << "\n" <<
+								"REFUND STATUS    : " << classObj.refundStatus << "\n" << endl;
+			
+				cout << "-------------------------------------------------------------------------------------------" << endl;
+				cout << "\n\t\t\tPRESS ENTER TO DISPLAY THE NEXT RECORD" << endl;
+				_getch();
+			}
+		}
+	if(flag)
+		cout << "\n\t\t\tALL EMERGENCY RECORDS ARE DISPLAYED" << endl;
+	if(!flag)
+		cout << "\n\t\t\t NO EMERGENCY PATIENT RECORDS TO DISPLAY" << endl;
+	cout << "*******************************************************************************************" << endl;
+	inObj.close();
+	cout << "\t\t\tPRESS ENTER TO CONTINUE" << endl;
+	_getch();
+}
+
+void patientRecord :: patientListOfParticularDate(int choice)
+{
+	bool flag = false;
+	patientRecord classObj;
+	ifstream inObj;
+	if(choice == 1)
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	else if(choice == 2)	
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	int Day;
+	int Month;
+	int Year;
+	cout << "\n\t\t\tENTER THE DATE TO DISPlAY THE RECORDS \n\t\t\t DD MM YYYY : ";
+	cin >> Day >> Month >> Year;
+	system("cls");
+	cout << "\t\t\t*****************************************\n\t\t\t PATIENT RECORDS OF DATE : "<< Day << " / " << Month << " / " << Year <<"\n\t\t\t*****************************************"
+		<< endl << endl;
+	while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if(choice == 1)
+				if(classObj.admittedDate.day == Day && classObj.admittedDate.month == Month && classObj.admittedDate.year == Year)
+				{
+					flag = true;
+					cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+					classObj.lastName << "\n" <<
+					"AGE            : " << classObj.age << "\n" <<
+					"PATIENT ID     : " << classObj.patientId << "\n" <<
+					"GENDER         : " << classObj.gender << "\n" <<
+					"ADDRESS       \n\t" <<
+					"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+					"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+					"CITY         : " << classObj.address.cityName << "\n\t" <<
+					"STATE        : " << classObj.address.state << "\n\t" <<
+					"PIN CODE     : " << classObj.address.pincode << "\n" <<
+				    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+					"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+					"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+					"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n" <<
+					"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+					"SERVICE TYPE   : " << classObj.serviceType << endl;
+					cout << "-------------------------------------------------------------------------------------------" << endl;
+					cout << "\n\t\t\tPRESS ENTER TO DISPLAY THE NEXT RECORD" << endl;
+					_getch();
+				}
+			if(choice == 2)
+				if(classObj.dischargeDate.day == Day && classObj.dischargeDate.month == Month && classObj.dischargeDate.year == Year)
+				{
+					flag = true;
+					cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+					classObj.lastName << "\n" <<
+					"PATIENT ID     : " << classObj.patientId << "\n" <<
+					"AGE            : " << classObj.age << "\n" <<
+					"GENDER         : " << classObj.gender << "\n" <<
+					"ADDRESS       \n\t" <<
+					"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+					"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+					"CITY         : " << classObj.address.cityName << "\n\t" <<
+					"STATE        : " << classObj.address.state << "\n\t" <<
+					"PIN CODE     : " << classObj.address.pincode << "\n" <<
+				    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+					"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+					"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+					"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n" <<
+					"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+					"SERVICE TYPE   : " << classObj.serviceType << "\n" <<
+					"TREATMENT AMOUNT : " << classObj.treatementAmount << "\n" <<
+					"BALANCE AMOUNT   : " << classObj.balanceAmount << "\n" <<
+					"REFUNDED AMOUNT  : " << classObj.refundAmount << "\n" <<
+					"DISCHARGED DATE  : " << classObj.dischargeDate.day << " " << classObj.dischargeDate.month <<" " << classObj.dischargeDate.year << "\n" <<
+					"PAYMENT STATUS   : " << classObj.paymentStatus << "\n" <<
+					"REFUND STATUS    : " << classObj.refundStatus << "\n" << endl;
+					cout << "-------------------------------------------------------------------------------------------" << endl;
+					cout << "\n\t\t\tPRESS ENTER TO DISPLAY THE NEXT RECORD" << endl;
+					_getch();
+				}
+		}
+	if(flag)
+		cout << "\n\t\t\tALL RECORDS OF DATE " << Day << " " << Month <<  " " << Year << " ARE DISPLAYED" << endl;
+	if(!flag)
+		cout << "\n\t\t\t NO PATIENT RECORDS OF DATE " << Day << " " << Month <<  " " << Year << "T O DISPLAY" << endl;
+	cout << "*******************************************************************************************" << endl;
+	inObj.close();
+	cout << "\t\t\tPRESS ENTER TO CONTINUE" << endl;
+	_getch();
+}
+
+void patientRecord :: searchPatientRecord()
+{
+	system("cls");
+	int choice1;
+	int choice2;
+	int position;
+	cout << "\n\t\t\t ENTER"                                      << endl <<
+			"\t\t\t 1. TO SEARCH FROM ADMITTED PATIENT RECORDS"   << endl <<
+			"\t\t\t 2. TO SEARCH FROM DISCHARGED PATIENT RECORDS" << endl << 
+			"\t\t\t 3. EXIT "                                     << endl <<
+			"\n\t\t\t YOUR CHOICE : ";
+	cin >> choice1;
+	patientRecord classObj;
+	ifstream inObj;
+	if(choice1 == 1)
+	{
+		if (!classObj.admittedPatientFileCheck())
+		{
+			cout << "\t\t\t NO RECORDS EXISTING IN ADMITTED PATIENT RECORD TO SEARCH" << endl << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			return;
+		}
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	}
+	else if(choice1 == 2)
+	{
+		if (!classObj.dischargedPatientFileCheck())
+		{
+			cout << "\t\t\t NO RECORDS EXISTING IN DISCHARGED PATIENTS RECORDS TO SEARCH" << endl << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			return;
+		}
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	}
+	else if(choice1 == 3)
+		exit(0);
+	cout << "\t\t\t PRESS 1 TO SEARCH THE PATIENT RECORD BY PATIENT NAME "               << endl <<
+		    "\t\t\t PRESS 2 TO SEARCH THE PATIENT RECORD BY PATIENT ID / AADHAAR NUMBER " << endl <<
+			"\t\t\t YOUR CHOICE : ";
+	cin >> choice2;
+	if (choice2 == 1)
+	{
+		char fName[15];
+		char lName[15];
+		cout << "\t\t\t ENTER PATIENT'S FULL NAME (FIRSTNAME LATSNAME) : ";
+		cin >> fName >> lName;
+		while (inObj)
+		{
+			position = inObj.tellg();
+			inObj.read((char*)&classObj, sizeof(classObj));
+			if (_stricmp(classObj.firstName,fName) == 0 && _stricmp(classObj.lastName,lName) == 0)
+			{
+				cout << "\t\t\t PATIENT'S RECORD WITH NAME  " << fName <<" "<< lName << " FOUND " << endl;
+				inObj.close();
+				classObj.displayRecord(position, choice1);
+				cout << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				return;
+			}
+		}
+		cout << "\t\t\t PATIENT'S RECORD WITH NAME  " << fName << " " << lName << " NOT FOUND" << endl << 
+				"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+	}
+	else if (choice2 == 2)
+	{
+		char id[18];
+		cout << "\n\t\t\t ENTER PATIENT ID i.e AADHAAR NUMBER : ";
+		cin >> id;
+		while (inObj)
+		{
+			position = inObj.tellg();
+			inObj.read((char*)&classObj, sizeof(classObj));
+			if (_stricmp(classObj.patientId,id) == 0)
+			{
+				cout << "\t\t\t PATIENT'S RECORD WITH ID  " << id << " FOUND " << endl;
+				inObj.close();
+				classObj.displayRecord(position, choice1);
+				cout << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				return;
+			}
+		}
+		cout << "PATIENT'S RECORD WITH ID " << id << " NOT FOUND" << endl <<
+				"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+	}
+	inObj.close();
+	_getch();
+	return;
+}
+
+void patientRecord :: editPatientRecord()
+{
+	system("cls");
+	int choice;
+	patientRecord classObj;
+	cout << "\n\t\t\tENTER"                              << endl <<
+			"\t\t\t 1. TO EDIT ADMITTED PATIENT RECORDS" << endl <<
+			"\t\t\t 2. TO EDIT DISCHARGED PATIENT"       << endl <<
+			"\t\t\t ENTER ANY OTHER NUMBER TO EXIT"      << endl <<
+			"\n\t\t\t YOUR CHOICE : ";
+	cin >> choice;
+	if(choice == 1)
+	{
+		if (!classObj.admittedPatientFileCheck())
+		{
+			cout << "\t\t\t NO RECORDS EXISTING IN ADMITTED PATIENT RECORD TO SEARCH" << endl <<
+					"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			return;
+		}
+		classObj.editAdmittedPatientRecords();
+	}
+	else if(choice == 2)
+	{
+		if (!classObj.dischargedPatientFileCheck())
+		{
+			cout << "\t\t\t NO RECORDS EXISTING IN DISCHARGED PATIENTS RECORDS TO SEARCH" << endl <<
+					"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			return;
+		}
+		classObj.editDischargedPatientRecords();
+	}
+}
+
+void patientRecord :: editAdmittedPatientRecords()
+{
+	fstream fObj("PatientRecord.bin", ios::in | ios::out | ios::binary);
+
+	int choice;
+	patientRecord classObj;
+	cout << "\t\t\t PRESS 1 TO EDIT THE PATIENT RECORD BY PATIENT NAME "                << endl <<
+			"\t\t\t PRESS 2 TO EDIT THE PATIENT RECORD BY PATIENT ID / AADHAAR NUMBER " << endl << 
+			"\t\t\t\t YOUR CHOICE : ";
+	cin >> choice;
+	int position;
+	bool flag = false;
+	char fName[15];
+	char lName[15];
+	char id[18];
+	if(choice == 1)
+	{
+		cout << "\t\t\t ENTER PATIENT'S FULL NAME (FIRSTNAME LATSNAME) : ";
+		cin >> fName >> lName;
+		while (fObj)
+		{
+			position = fObj.tellp();
+			fObj.read((char*)&classObj, sizeof(classObj));
+			if (_stricmp(classObj.firstName, fName) == 0 && _stricmp(classObj.lastName, lName) == 0)
+			{
+				flag = true;
+				cout << "\t\t\tRECORD OF MR/MRS." << fName << " " << lName << endl << endl;
+				break;
+			}
+		}
+	}
+	if(choice == 2)
+	{
+		cout << "\t\t\t ENTER PATIENT ID / AADHAAR NUMBER : ";
+		cin >> id;
+		while (fObj)
+		{
+			position = fObj.tellp();
+			fObj.read((char*)&classObj, sizeof(classObj));
+			if (_stricmp(classObj.patientId, id) == 0)
+			{
+				flag = true;
+				cout << "\t\t\tRECORD OF MR/MRS." << id << endl << endl;
+				break;
+			}
+		}
+	}
+		if(flag)
+		{
+			classObj.displayRecord(position,1);
+			int mChoice, dChoice, amount;
+				cout << "\n\t\t\t WHAT WOULD YOU TO LIKE TO MODIFY ?" << endl
+				<< "\t\t\t 1. AGE" << "\n\t\t\t 2. DISEASE" << "\n\t\t\t 3. SERVICE TYPE"
+				<< "\n\t\t\t 4.EXIT" << "\n\t\t\t YOUR CHOICE : ";
+				cin >> mChoice;
+				cout << "\n";
+				ifstream serviceObj;
+				switch (mChoice)
+				{
+					case 1:
+						cout << "\n\t\t\t ENTER THE AGE OF THE PATIENT : ";
+						cin >> classObj.age;
+						_getch();
+						break;
+					case 2:
+						cout << "\t\t\t---------------------"<< endl <<
+								"\t\t\t||DISEASE          ||"<< endl <<
+							    "\t\t\t|| 1. CARDIOLOGY   ||"<< endl <<
+								"\t\t\t|| 2. ORTHOPEDICS  ||"<< endl << 
+								"\t\t\t|| 3. GYNACOLOGY   ||"<< endl << 
+								"\t\t\t|| 4. PEDIATRITION ||"<< endl <<
+								"\t\t\t|| 5. ENT          ||"<< endl <<
+								"\t\t\t|| 6. DERMITOLOGY  ||"<< endl <<
+								"\t\t\t|| 7. GASTRO       ||"<< endl <<
+								"\t\t\t---------------------"<< endl <<
+								"\t\t\t YOUR CHIOCE : ";
+						cin >> dChoice;
+						amount = classObj.depositAmount;
+						serviceObj.open("ServiceRecord.bin", ios :: in | ios :: binary);
+						hospitalServiceRecord hospitalClassObj;
+						while(serviceObj.read((char *)&hospitalClassObj, sizeof(hospitalClassObj)))
+							{
+								if(hospitalClassObj.diseaseId == dChoice)
+								{
+									strcpy_s(classObj.diseaseDescription, hospitalClassObj.diseaseDescription);
+									strcpy_s(classObj.docFirstName, hospitalClassObj.docFirstName);
+									strcpy_s(classObj.docLastName, hospitalClassObj.docLastName);
+									classObj.specialistRoomNumber = hospitalClassObj.specialistRoomNumber;
+									classObj.depositAmount = hospitalClassObj.depositAmount;
+									strcpy_s(classObj.specialisation, hospitalClassObj.specialisation);
+								}
+							}
+						serviceObj.close();
+						int sChoice1;
+						cout << "\n\t\t\t CHOOSE SERVICE TYPE" << endl <<
+								"\t\t\t 1. OPD"                << endl <<
+								"\t\t\t 2. EMERGENCY"          << endl <<
+								"\n\t\t\t YOUR CHOICE : ";
+						cin >> sChoice1;
+						if (sChoice1 == 1)
+							strcpy_s(classObj.serviceType, "OPD      ");
+						else
+							strcpy_s(classObj.serviceType, "EMERGENCY");
+						cout << "\t\t\t ROOM ALLOCATED TO MR/MRS " << classObj.firstName << classObj.lastName << " : " << classObj.specialistRoomNumber << endl;
+						cout << "\n\t\t\t DOCTOR NAME : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << endl;
+						if(classObj.depositAmount - amount > 0)
+							cout << "\t\t\t AMOUNT TO BE DEPOSITED : " << classObj.depositAmount - amount <<"\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+						else if(classObj.depositAmount - amount < 0)
+							cout << "\t\t\t AMOUNT TO BE REFUNDED TO THE PATIENT : " <<  amount - classObj.depositAmount  <<"\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+						else if(classObj.depositAmount - amount > 0)
+							cout << "\t\t\t TOTAL AMOUNT PAID " << "\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+						_getch();
+						break;
+					case 3:
+						int sChoice;
+						cout << "\n\t\t\t CHOOSE SERVICE TYPE" << endl <<
+								"\t\t\t 1. OPD"                << endl <<
+								"\t\t\t 2. EMERGENCY"          << endl <<
+								"\n\t\t\t YOUR CHOICE : ";
+						cin >> sChoice;
+						if (sChoice == 1)
+							strcpy_s(classObj.serviceType, "OPD      ");
+						else
+							strcpy_s(classObj.serviceType, "EMERGENCY");
+						break;
+					case 4:
+						exit(1);
+						break;
+					default:cout << "\n\t\t\t INVALID OPTION" << endl <<
+									"PRESS ENTER TO CONTINUE" << endl;
+						_getch();
+						break;
+				}
+		fObj.seekp(position, 0);
+		fObj.write((char*)&classObj,sizeof(classObj));
+		fObj.close();
+		cout << "\n\t\t\t THE MODIFIED PATIENT RECORD : \n" << endl;
+		classObj.displayRecord(position,1);
+		}
+	if(!flag && choice == 1)
+	{
+		cout << "\n\t\t\t PATIENT RECORDS WITH NAME MR/MRS " << fName << " " << lName << " IS NOT FOUND" << endl <<
+				"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		fObj.close();
+		_getch();
+	}
+	else if(!flag && choice == 1)
+	{
+		cout << "\n\t\t\t PATIENT RECORDS WITH ID " << id << " IS NOT FOUND" << endl <<
+				"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		fObj.close();
+		_getch();
+	}
+	}
+
+void patientRecord :: editDischargedPatientRecords()
+{
+	fstream fObj("DischargeRecord.bin", ios::in | ios::out | ios::binary);
+	int choice;
+	patientRecord classObj;
+	cout << "\t\t\t PRESS 1 TO EDIT THE PATIENT RECORD BY PATIENT NAME "                << endl <<
+		    "\t\t\t PRESS 2 TO EDIT THE PATIENT RECORD BY PATIENT ID / AADHAAR NUMBER " << endl << 
+			"\n\t\t\t YOUR CHOICE : ";
+	cin >> choice;
+	int position;
+	bool flag = false;
+	char fName[15];
+	char lName[15];
+	char id[18];
+	if(choice == 1)
+	{
+		cout << "\t\t\t ENTER PATIENT'S FULL NAME (FIRSTNAME LATSNAME) : ";
+		cin >> fName >> lName;
+		while (fObj)
+		{
+			position = fObj.tellp();
+			fObj.read((char*)&classObj, sizeof(classObj));
+			if (_stricmp(classObj.firstName, fName) == 0 && _stricmp(classObj.lastName, lName) == 0)
+			{
+				flag = true;
+				cout << "\t\t\tRECORD OF MR/MRS." << fName << " " << lName << endl << endl;
+				break;
+			}
+		}
+	}
+	if(choice == 2)
+	{
+		cout << "\t\t\t ENTER PATIENT'S ID / AADHAAR NUMBER : ";
+		cin >> id;
+		while (fObj)
+		{
+			position = fObj.tellp();
+			fObj.read((char*)&classObj, sizeof(classObj));
+			if (_stricmp(classObj.patientId, id) == 0)
+			{
+				flag = true;
+				cout << "\t\t\tRECORD OF MR/MRS." << id << endl << endl;
+				break;
+			}
+		}
+	}
+		if(flag)
+		{
+			classObj.displayRecord(position,2);
+			int mChoice, dChoice, amount;
+				cout << "\n\t\t\t WHAT WOULD YOU TO LIKE TO MODIFY ?" << endl <<
+						"\t\t\t 1. TREATMENT AMOUNT"                  << endl <<
+						"\t\t\t 2. EXIT"                              << endl <<
+						"\n\t\t\t YOUR CHOICE : ";
+				cin >> mChoice;
+				cout << endl;
+				switch (mChoice)
+				{
+					case 1 :
+						cout << "\n\t\t\t ENTER THE TREATMENT AMOUNT : ";
+						cin >> classObj.treatementAmount;
+						int ch;
+						if(classObj.depositAmount - classObj.treatementAmount == 0)
+						{
+							classObj.balanceAmount = classObj.treatementAmount - classObj.depositAmount;
+							classObj.refundAmount = 0;
+							cout << "\t\t\t TOTAL AMOUNT PAID " << endl;
+							cout << "\n\t\t\t PRESS ENTER TO CONTINUE " << endl;
+							_getch();
+							strcpy_s(classObj.paymentStatus,"CLEARED");
+							strcpy_s(classObj.refundStatus,"NILL");
+						}
+						else if(classObj.depositAmount - classObj.treatementAmount < 0)
+						{
+							classObj.balanceAmount = classObj.treatementAmount - classObj.depositAmount;
+							classObj.refundAmount = 0;
+							cout << "\t\t\t AMOUNT TO BE PAID : " << classObj.treatementAmount - classObj.depositAmount << endl;
+							cout << "\t\t\tENTER"                            << endl <<
+									"\t\t\t 1 . IF THE TOTAL AMOUNT IS PAID" << endl << 
+									"\t\t\t 2 . IF NOT PAID"                 << endl <<
+									"\t\t\t\t YOUR CHOICE : ";
+							cin >> ch;
+							if(ch == 1)
+								strcpy_s(classObj.paymentStatus,"CLEARED");
+							if(ch == 2)
+								strcpy_s(classObj.paymentStatus,"NOT CLEARED");
+							strcpy_s(classObj.refundStatus,"NILL");
+						}
+						else if(classObj.depositAmount - classObj.treatementAmount > 0)
+						{
+							classObj.refundAmount = classObj.depositAmount - classObj.treatementAmount;
+							classObj.balanceAmount = 0;
+							cout << "\t\t\t AMOUNT TO BE REFUNDED TO THE PATIENT : " << classObj.refundAmount << endl;
+							cout << "\t\t\tENTER"                                           << endl <<
+									"\t\t\t 1. IF THE TOTAL AMOUNT REFUNDED TO THE PATIENT" << endl <<
+									"\t\t\t 2. IF NOT REFUNDED"                             << endl << 
+									"\t\t\t YOUR CHOICE : ";
+							cin >> ch;
+							if(ch == 1)
+								strcpy_s(classObj.refundStatus,"REFUNDED");
+							if(ch == 2)
+								strcpy_s(classObj.refundStatus,"NOT REFUNDED");
+							strcpy_s(classObj.paymentStatus,"NILL");
+						}
+						break;
+					case 2 :
+						exit(1);
+						break;
+					default:cout << "\n\t\t\t INVALID OPTION" << endl << 
+									"PRESS ENTER TO CONTINUE" << endl;
+						_getch();
+						break;
+				}
+		fObj.seekp(position, 0);
+		fObj.write((char*)&classObj,sizeof(classObj));
+		fObj.close();
+		cout << "\n\t\t\t THE MODIFIED PATIENT RECORD : \n" << endl;
+		classObj.displayRecord(position,2);
+		}
+	if(!flag && choice == 1)
+	{
+		fObj.close();
+		cout << "\n\t\t\t PATIENT RECORDS WITH NAME MR/MRS " << fName << " " << lName << " IS NOT FOUND" << endl <<
+				" \t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+	else if(!flag && choice == 1)
+	{
+		fObj.close();
+		cout << "\n\t\t\t PATIENT RECORDS WITH ID " << id << " IS NOT FOUND" << endl <<
+				"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+}
+
+void patientRecord :: dischargePatient()
+{
+	system("cls");
+	patientRecord classObj;
+	if (!classObj.admittedPatientFileCheck())
+	{
+		cout << "\t\t\t NO PATIENTS TO DISCHARGE " << endl <<
+				"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+		return;
+	}
+	int choice;
+	char fName[15];
+	char lName[15];
+	char id[18];
+	int flag = false;
+	cout << "\t\t\t ENTER 1 TO DISCHARGE THE PATIENT RECORD BY PATIENT NAME " << endl << endl <<
+		    "\t\t\t ENTER 2 TO DISCHARGE THE PATIENT RECORD BY PATIENT ID  "  << endl << endl << 
+		    "\t\t\t ENTER ANY OTHER KEY TO EXIT"                              << endl << 
+			"\t\t\t\t YOUR CHOICE : ";
+	cin >> choice;
+	if (choice == 1)
+	{
+		ifstream inObj("PatientRecord.bin", ios::in | ios::binary);
+		ofstream outObj("DischargeRecord.bin", ios::app | ios::binary);
+		ofstream dupObj("duplicate.bin", ios::out | ios::binary);
+		int position;
+		cout << "\t\t\t ENTER PATIENT'S FULL NAME (FIRSTNAME LATSNAME) : ";
+		cin >> fName >> lName;
+		while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if (_stricmp(classObj.firstName,fName) == 0 && _stricmp(classObj.lastName,lName) == 0)	
+			{
+				flag = true;
+				cout << "\t\t\t PATIENT'S RECORD WITH NAME MR/MRS." << fName <<" "<< lName << " FOUND " << endl <<
+						"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				//AUTOMATICALLY ASSIGNING THE SYSTEM DATE AS DISCHARGE DATE
+				struct tm newtime;
+				time_t now = time(0);
+				localtime_s(&newtime, &now);
+				classObj.dischargeDate.day =newtime.tm_mday;
+				classObj.dischargeDate.month = 1 + newtime.tm_mon;
+				classObj.dischargeDate.year = 1900 + newtime.tm_year;
+				cout << "\n\t\t\tENTER THE TREATMENT AMOUNT : ";
+				cin >> classObj.treatementAmount;
+				if(classObj.depositAmount - classObj.treatementAmount == 0)
+						{
+							classObj.balanceAmount = classObj.treatementAmount - classObj.depositAmount;
+							classObj.refundAmount = 0;
+							cout << "\t\t\t TOTAL AMOUNT PAID " << endl;
+							cout << "\n\t\t\t PRESS ENTER TO CONTINUE " << endl;
+							_getch();
+							strcpy_s(classObj.paymentStatus,"CLEARED");
+							strcpy_s(classObj.refundStatus,"NILL");
+						}
+				else if(classObj.depositAmount - classObj.treatementAmount > 0)
+				{
+					classObj.refundAmount = classObj.depositAmount - classObj.treatementAmount;
+					classObj.balanceAmount = 0;
+					cout << "\t\t\t AMOUNT TO BE REFUNDED TO THE PATIENT : " << classObj.refundAmount << endl;
+					int ch;
+					cout << "\n\t\t\tENTER"                                      << endl <<
+							"\t\t\t 1. IF THE AMOUNT IS REFUNDED TO THE PATIENT" << endl <<
+							"\t\t\t 2. IF NOT REFUNDED"                          << endl <<
+							"\t\t\t\t YOUR CHOICE : ";
+					cin >> ch;
+					if(ch == 1)
+						strcpy_s(classObj.refundStatus,"REFUNDED");
+					if(ch == 2)
+						strcpy_s(classObj.refundStatus,"NOT REFUNDED");
+					strcpy_s(classObj.paymentStatus,"NILL");
+					cout <<"\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+				}
+				else if(classObj.depositAmount - classObj.treatementAmount < 0)
+				{
+					classObj.balanceAmount = classObj.treatementAmount - classObj.depositAmount;
+					classObj.refundAmount = 0;
+					cout << "\t\t\t AMOUNT TO BE PAID : " << classObj.treatementAmount - classObj.depositAmount << endl;
+					int ch;
+					cout << "\n\t\t\tENTER"                         << endl <<
+						    "\t\t\t 1. IF THE TOTAL AMOUNT IS PAID" << endl <<
+							"\t\t\t 2. IF NOT PAID"                 << endl <<
+							"\t\t\t\t YOUR CHOICE : ";
+					cin >> ch;
+					if(ch == 1)
+						strcpy_s(classObj.paymentStatus,"CLEARED");
+					if(ch == 2)
+						strcpy_s(classObj.paymentStatus,"NOT CLEARED");
+					strcpy_s(classObj.refundStatus,"NILL");
+					cout <<"\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+				}
+				_getch();
+				cout << "\t\t\t MR./MRS." << fName << " " << lName << " DISCHARGED" <<
+				endl <<"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				outObj.write((char *)&classObj,sizeof(classObj));
+				continue;
+			}
+			dupObj.write((char *)&classObj,sizeof(classObj));
+		}
+	outObj.close();
+	inObj.close();
+	dupObj.close();
+	remove("PatientRecord.bin");
+	int num = rename("duplicate.bin","PatientRecord.bin");
+	}
+	if (choice == 2)
+	{			
+		ifstream inObj("PatientRecord.bin", ios::in | ios::binary);
+		ofstream outObj("DischargeRecord.bin", ios::app | ios::binary);
+		ofstream dupObj("duplicate.bin", ios::out | ios::binary);
+		int position;
+		cout << "\t\t\t ENTER PATIENT ID / AADHAAR NUMBER : ";
+		cin >> id;
+		while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if (_stricmp(classObj.patientId,id) == 0)
+			{
+				flag = true;
+				cout << "\t\t\t PATIENT'S RECORD WITH ID " << id << " FOUND " << endl;
+				cout << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				//AUTOMATICALLY ASSIGNING THE SYSTEM DATE AS DISCHARGE DATE
+				struct tm newtime;
+				time_t now = time(0);
+				localtime_s(&newtime, &now);
+				classObj.dischargeDate.day =newtime.tm_mday;
+				classObj.dischargeDate.month = 1 + newtime.tm_mon;
+				classObj.dischargeDate.year = 1900 + newtime.tm_year;
+				cout << "\n\t\t\tENTER THE TREATMENT AMOUNT : ";
+				cin >> classObj.treatementAmount;
+				if(classObj.depositAmount - classObj.treatementAmount == 0)
+						{
+							classObj.balanceAmount = classObj.treatementAmount - classObj.depositAmount;
+							classObj.refundAmount = 0;
+							cout << "\t\t\t TOTAL AMOUNT PAID " << endl <<
+									"\n\t\t\t PRESS ENTER TO CONTINUE " << endl;
+							_getch();
+							strcpy_s(classObj.paymentStatus,"CLEARED");
+							strcpy_s(classObj.refundStatus,"NILL");
+						}
+				else if(classObj.depositAmount - classObj.treatementAmount > 0)
+				{
+					classObj.refundAmount = classObj.depositAmount - classObj.treatementAmount;
+					classObj.balanceAmount = 0;
+					cout << "\t\t\t AMOUNT TO BE REFUNDED TO THE PATIENT : " << classObj.refundAmount << endl;
+					int ch;
+					cout << "\n\t\t\tENTER"                                      << endl <<
+							"\t\t\t 1. IF THE AMOUNT IS REFUNDED TO THE PATIENT" << endl <<
+							"\t\t\t 2. IF NOT REFUNDED"                          << endl <<
+							"\t\t\t\t YOUR CHOICE : ";
+					cin >> ch;
+					if(ch == 1)
+						strcpy_s(classObj.refundStatus,"REFUNDED");
+					if(ch == 2)
+						strcpy_s(classObj.refundStatus,"NOT REFUNDED");
+					strcpy_s(classObj.paymentStatus,"NILL");
+					cout <<"\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+				}
+				else if(classObj.depositAmount - classObj.treatementAmount < 0)
+				{
+					classObj.balanceAmount = classObj.treatementAmount - classObj.depositAmount;
+					classObj.refundAmount = 0;
+					cout << "\t\t\t AMOUNT TO BE PAID : " << classObj.treatementAmount - classObj.depositAmount << endl;
+					int ch;
+					cout << "\n\t\t\tENTER"                         << endl <<
+						    "\t\t\t 1. IF THE TOTAL AMOUNT IS PAID" << endl <<
+							"\t\t\t 2. IF NOT PAID"                 << endl <<
+							"\t\t\t\t YOUR CHOICE : ";
+					cin >> ch;
+					if(ch == 1)
+						strcpy_s(classObj.paymentStatus,"CLEARED");
+					if(ch == 2)
+						strcpy_s(classObj.paymentStatus,"NOT CLEARED");
+					strcpy_s(classObj.refundStatus,"NILL");
+					cout <<"\n\t\t\tPRESS ENTER TO CONTINUE" <<endl;
+				}
+				_getch();
+				cout << "\t\t\t MR./MRS." << classObj.firstName << " " << classObj.lastName << " DISCHARGED" << endl <<
+						"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				outObj.write((char *)&classObj,sizeof(classObj));
+				continue;
+			}
+			dupObj.write((char *)&classObj,sizeof(classObj));
+		}
+	outObj.close();
+	inObj.close();
+	dupObj.close();
+	remove("PatientRecord.bin");
+	int num = rename("duplicate.bin","PatientRecord.bin");
+	}
+	if(!flag && choice == 1)
+	{
+		cout << "\t\t\t PATIENT'S RECORD WITH NAME  MR/MRS." << fName << " " << lName << " NOT FOUND \n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+	else if(!flag && choice == 2)
+	{
+		cout << "\t\t\t PATIENT'S RECORD WITH ID " << id << " NOT FOUND \n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+}
+
+void patientRecord :: deletePatientRecord()
+{
+	system("cls");
+	int choice1, choice2;
+	cout << "\n\t\t\tENTER"                                 << endl <<
+			"\t\t\t 1. TO DELETE ADMITTED PATIENT RECORD"   << endl <<
+			"\t\t\t 2. TO DELETE DISCHARGED PATIENT RECORD" << endl <<
+			"\t\t\t\t YOUR CHOICE : ";
+	cin >> choice1;
+	patientRecord classObj;
+	ifstream inObj;
+	if(choice1 == 1)
+	{
+		if (!classObj.admittedPatientFileCheck())
+		{
+			cout << "\t\t\t NO ADMITTED PATIENT RECORDS TO DELETE" << endl << 
+					"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			return;
+		}
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	}
+	else if(choice1 == 2)
+	{
+		if (!classObj.dischargedPatientFileCheck())
+		{
+			cout << "\t\t\t NO DISCHARGED PATIENT RECORDS TO DELETE" << endl <<
+					"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+			_getch();
+			return;
+		}
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	}
+	char fName[15];
+	char lName[15];
+	char id[18];
+	int flag = false;
+	cout << "\t\t\t ENTER 1 TO DELETE THE PATIENT RECORD BY PATIENT NAME " << endl << endl <<
+		    "\t\t\t ENTER 2 TO DELETE THE PATIENT RECORD BY PATIENT ID  "  << endl << endl << 
+		    "\t\t\t ENTER ANY OTHER KEY TO EXIT"<< "\n\t\t\t YOUR CHOICE : ";	
+	cin >> choice2;
+	
+	if (choice2 == 1)
+	{
+		ofstream outObj("duplicate.bin", ios::out | ios::binary);
+		int position;
+		cout << "\t\t\t ENTER PATIENT'S FULL NAME (FIRSTNAME LATSNAME) : ";
+		cin >> fName >> lName;
+		while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if (_stricmp(classObj.firstName,fName) == 0 && _stricmp(classObj.lastName,lName) == 0)
+			{
+				flag = true;
+				cout << "\t\t\t PATIENT'S RECORD WITH NAME MR/MRS." << fName <<" "<< lName << " FOUND " << endl <<
+					    "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				cout << "\t\t\t PATIENT'S RECORD WITH NAME  " << fName << " " << lName << " SUCCESSFULLY DELETED" << endl <<
+						"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				continue;
+			}
+			outObj.write((char *)&classObj,sizeof(classObj));
+		}
+		inObj.close();
+		outObj.close();
+		if(choice1 == 1)
+		{
+			remove("PatientRecord.bin");
+			int nu = rename("duplicate.bin","PatientRecord.bin");
+		}
+		else if(choice1 == 2)
+		{
+			remove("DischargeRecord.bin");
+			int nu = rename("duplicate.bin","DischargeRecord.bin");
+		}
+	}
+	if (choice2 == 2)
+	{			
+		ofstream outObj("duplicate.bin", ios::out | ios::binary);
+		int position;
+		cout << "\t\t\t ENTER PATIENT ID / AADHAAR NUMBER : ";
+		cin >> id;
+		while (inObj.read((char*)&classObj, sizeof(classObj)))
+		{
+			if (_stricmp(classObj.patientId,id) == 0)
+			{
+				flag = true;
+				cout << "\t\t\t PATIENT'S RECORD WITH ID " << id << " FOUND " << endl <<
+						"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				cout << "\t\t\t PATIENT'S RECORD WITH ID  " << id << " SUCCESSFULLY DELETED" << endl <<
+						"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				continue;
+			}
+			outObj.write((char *)&classObj,sizeof(classObj));
+		}
+		inObj.close();
+		outObj.close();
+		if(choice1 == 1)
+		{
+			remove("PatientRecord.bin");
+			int nu = rename("duplicate.bin","PatientRecord.bin");
+		}
+		else if(choice1 == 2)
+		{
+			remove("DischargeRecord.bin");
+			int nu = rename("duplicate.bin","DischargeRecord.bin");
+		}
+	}
+	if(!flag && choice2 == 1) 
+	{
+		cout << "\t\t\t PATIENT'S RECORD WITH NAME  MR/MRS." << fName << " " << lName << " NOT FOUND" << endl <<
+				" \n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+	else if(!flag && choice2 == 2) 
+	{
+		cout << "\t\t\t PATIENT'S RECORD WITH ID " << id << " NOT FOUND" << endl <<
+				"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+}
+
+void patientRecord::displayRecord(int position, int choice)
+{
+	ifstream inObj;
+	patientRecord classObj;
+	if(choice == 1)
+		inObj.open("PatientRecord.bin", ios::in | ios::binary);
+	else if(choice == 2)
+		inObj.open("DischargeRecord.bin", ios::in | ios::binary);
+	inObj.seekg(position,0);
+	inObj.read((char*)&classObj, sizeof(classObj));
+					cout << "PATIENT NAME   : " << classObj.firstName << " " <<
+					classObj.lastName << "\n" <<
+					"AGE            : " << classObj.age << "\n" <<
+					"PATIENT ID     : " << classObj.patientId << "\n" <<
+					"GENDER         : " << classObj.gender << "\n" <<
+					"ADDRESS       \n\t" <<
+					"PLOT NUMBER  : "<< classObj.address.plotNumber << "\n\t" <<
+					"ROAD NUMBER  : " << classObj.address.roadNumber << "\n\t" <<
+					"CITY         : " << classObj.address.cityName << "\n\t" <<
+					"STATE        : " << classObj.address.state << "\n\t" <<
+					"PIN CODE     : " << classObj.address.pincode << "\n" <<
+				    "DISEASE        : " << classObj.diseaseDescription << "\n" <<
+					"DOCTOR NAME  : " << classObj.docFirstName << " " << classObj.docLastName << " " << classObj.specialisation << "\n" <<
+					"ROOM NO.       : " << classObj.specialistRoomNumber << "\n" <<
+					"ADMISSION DATE : " << classObj.admittedDate.day << " " << classObj.admittedDate.month << " " << classObj.admittedDate.year << "\n" <<
+					"AMOUNT PAID    : " << classObj.depositAmount << "\n" <<
+					"SERVICE TYPE   : " << classObj.serviceType << endl;
+					if(choice == 2)
+					cout << "TREATMENT AMOUNT : " << classObj.treatementAmount << "\n" <<
+						"BALANCE AMOUNT   : " << classObj.balanceAmount << "\n" <<
+						"REFUNDED AMOUNT  : " << classObj.refundAmount << "\n" <<
+						"DISCHARGED DATE  : " << classObj.dischargeDate.day << " " << classObj.dischargeDate.month << " " << classObj.dischargeDate.year << "\n" <<
+						"PAYMENT STATUS   : " << classObj.paymentStatus << "\n" <<
+						"REFUND STATUS    : " << classObj.refundStatus << "\n" << endl;
+	cout << "-------------------------------------------------------------------------------------------" << endl;
+	inObj.close();
+	cout << "\n\t\t\tPRESS ENTER TO CONTINUE " << endl;
+	_getch();
+	return;
+}
+
+bool patientRecord::admittedPatientFileCheck()
+{
+	patientRecord classObj;
+	ifstream inObj("PatientRecord.bin", ios::in | ios::binary);
+	while(inObj.read((char *)&classObj, sizeof(classObj)))
+	{
+		inObj.close();
+		return true;
+	}
+	inObj.close();
+	return false;
+}
+
+bool patientRecord::dischargedPatientFileCheck()
+{
+	patientRecord classObj;
+	ifstream inObj("DischargeRecord.bin", ios::in | ios::binary);
+	while(inObj.read((char *)&classObj, sizeof(classObj)))
+	{
+		inObj.close();
+		return true;
+	}
+	inObj.close();
+	return false;
+}

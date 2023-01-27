@@ -1,0 +1,280 @@
+#include"classHeader.h"
+
+hospitalServiceRecord hospitalClassObj;
+
+bool hospitalServiceRecord :: serviceRecordFileCheck()
+{
+	patientRecord classObj;
+	ifstream inObj("ServiceRecord.bin", ios::in | ios::binary);
+	while(inObj.read((char *)&classObj, sizeof(classObj)))
+	{
+		inObj.close();
+		return true;
+	}
+	inObj.close();
+	return false;
+}
+
+void hospitalServiceRecord :: addNewService()
+{
+	system("cls");
+	cout << "\n\t\t\t ENTER DISEASE DESCRIPTION : ";
+	cin >> hospitalClassObj.diseaseDescription; 
+	cout << "\t\t\t ENTER DEPOSIT AMOUNT        : ";
+	cin >> hospitalClassObj.depositAmount;
+	cout << "\t\t\t ENTER DESEASE ID            : ";
+	cin >> hospitalClassObj.diseaseId;
+	cout << "\n\t\t\t ENTER ALLOCATED DOCTOR DETAILS "<< endl ;
+	cout << "\t\t\t\t DOCTOR'S FIRST NAME : ";
+	cin >> hospitalClassObj.docFirstName;
+	cout << "\t\t\t\t DOCTOR'S LAST NAME  : ";
+	cin >> hospitalClassObj.docLastName;
+	cout << "\t\t\t\t SPECIALISATION      : ";
+	cin >> hospitalClassObj.specialisation;
+	cout << "\t\t\t\t ROOM NUMBER         : ";
+	cin >> hospitalClassObj.specialistRoomNumber;
+	ofstream outObj("ServiceRecord.bin", ios::app | ios::binary);
+	outObj.write((char*)&hospitalClassObj,sizeof(hospitalClassObj));
+	outObj.close();
+}
+
+void hospitalServiceRecord :: displayServices()
+{
+	system("cls");
+	if (!hospitalClassObj.serviceRecordFileCheck())
+	{
+		cout << "\t\t\t NO SERVICES TO DISPLAY" << endl << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+		return;
+	}
+	ifstream inObj("ServiceRecord.bin", ios::in | ios::binary);
+	while(inObj.read((char*)&hospitalClassObj, sizeof(hospitalClassObj)))
+	{
+		cout << "\n\t\t DISEASE DESCRIPTION : " << hospitalClassObj.diseaseDescription 
+			 << "\n\t\t DEPOSIT AMOUNT      : " << hospitalClassObj.depositAmount
+			 << "\n\t\t DISEASE ID          : " << hospitalClassObj.diseaseId
+			 << "\n\n\t\t\t     ALLOCATED DOCTOR DETAILS"
+			 << "\n\n\t\t DOCTOR'S NAME     : " << hospitalClassObj.docFirstName << " " << hospitalClassObj.docLastName
+			 << "\n\t\t SPECIALISATION    : " << hospitalClassObj.specialisation 
+			 << "\n\t\t ROOM NUMBER       : " << hospitalClassObj.specialistRoomNumber << endl;
+		cout << "\n\t\t\t PRESS ENTER TO DISPLAY NEXT SERVICE RECORD" << endl;
+		_getch();
+	}
+	inObj.close();
+}
+
+void hospitalServiceRecord :: displayService(int position)
+{
+	ifstream inObj("ServiceRecord.bin", ios::in | ios::binary);
+	inObj.seekg(position, 0);
+	inObj.read((char*)&hospitalClassObj, sizeof(hospitalClassObj));
+		cout << "\n\t\t DISEASE DESCRIPTION : " << hospitalClassObj.diseaseDescription 
+			 << "\n\t\t DEPOSIT AMOUNT      : " << hospitalClassObj.depositAmount
+			 << "\n\t\t DISEASE ID          : " << hospitalClassObj.diseaseId
+			 << "\n\n\t\t\t     ALLOCATED DOCTOR DETAILS"
+			 << "\n\n\t\t DOCTOR'S NAME     : " << hospitalClassObj.docFirstName << " " << hospitalClassObj.docLastName
+			 << "\n\t\t SPECIALISATION    : " << hospitalClassObj.specialisation 
+			 << "\n\t\t ROOM NUMBER       : " << hospitalClassObj.specialistRoomNumber << endl;
+	inObj.close();
+	cout << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+}
+
+void hospitalServiceRecord :: editService()
+{
+	system("cls");
+	if (!hospitalClassObj.serviceRecordFileCheck())
+	{
+		cout << "\t\t\t NO SERVICES TO EDIT" << endl << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+		return;
+	}
+	fstream fObj("ServiceRecord.bin", ios::in | ios::out | ios::binary);
+	int choice;
+	cout << "\t\t\t PRESS 1 TO EDIT THE SERVICE RECORD BY DISEASE DESCRIPTION " << endl
+		<< "\t\t\t PRESS 2 TO EDIT THE SERVICE RECORD BY ID " << endl << "\t\t\t YOUR CHOICE : ";
+	cin >> choice;
+	int position;
+	bool flag = false;
+	char description[20];
+	int id;
+	if(choice == 1)
+	{
+		cout << "\t\t\t ENTER DISEASE DESCRIPTION : ";
+		cin >> description;
+		while (fObj)
+		{
+			position = fObj.tellp();
+			fObj.read((char*)&hospitalClassObj, sizeof(hospitalClassObj));
+			if (_stricmp(hospitalClassObj.diseaseDescription, description) == 0)
+			{
+				flag = true;
+				cout << "\t\t\t SERVICE RECORD OF " << description << endl << endl;
+				break;
+			}
+		}
+	}
+	if(choice == 2)
+	{
+		cout << "\t\t\t ENTER DISEASE ID : ";
+		cin >> id;
+		while (fObj)
+		{
+			position = fObj.tellp();
+			fObj.read((char*)&hospitalClassObj, sizeof(hospitalClassObj));
+			if (hospitalClassObj.diseaseId == id)
+			{
+				flag = true;
+				cout << "\t\t\tSERVICE RECORD WITH ID " << id << endl << endl;
+				break;
+			}
+		}
+	}
+	
+	if(flag)
+		{
+			hospitalClassObj.displayService(position);
+			int mChoice;
+				cout << "\n\t\t\t WHAT WOULD YOU TO LIKE TO MODIFY ?" << endl <<
+						"\t\t\t 1. DEPOSIT AMOUNT "                   << endl <<
+						"\t\t\t 2. DOCTOR'S DETAILS "                 << endl <<
+						"\t\t\t 3. ROOM NUMBER"                       << endl <<
+						"\t\t\t 4.EXIT"                               << endl << 
+						"\t\t\t YOUR CHOICE : ";
+				cin >> mChoice;
+				cout << "\n";
+
+				switch(mChoice)
+				{
+				case 1 :
+					cout << "\t\t\tENTER NEW DEPOSIT AMOUNT : ";
+					cin >> hospitalClassObj.depositAmount;
+					break;
+				case 2 :
+					cout << "\t\t\t ENTER DOCTOR'S FIRST NAME : ";
+					cin >> hospitalClassObj.docFirstName;
+					cout << "\t\t\t ENTER DOCTOR'S LAST NAME  : ";
+					cin >> hospitalClassObj.docLastName;
+					cout << "\t\t\t SPECIALISATION            : ";
+					cin >> hospitalClassObj.specialisation;
+					cout << "\t\t\t DISEASE TREATED BY " << hospitalClassObj.docFirstName << " " << hospitalClassObj.docLastName << " : ";
+					cin >> hospitalClassObj.diseaseDescription;
+					cout << "\t\t\t ROOM NUMBER               : ";
+					cin >> hospitalClassObj.specialistRoomNumber;
+					break;
+				case 3 :
+					cout << "\t\t\t ROOM NUMBER : ";
+					cin >> hospitalClassObj.specialistRoomNumber;
+					break;
+				case 4 :
+					exit(1);
+				default :
+					cout << "\t\t\t INVALID OPTION " << endl << "\n\t\t\t PRESS ENTER TO CONTINUE " << endl;
+					_getch();
+					break;
+			}
+			fObj.seekp(position, 0);
+			fObj.write((char*)&hospitalClassObj,sizeof(hospitalClassObj));
+			fObj.close();
+			cout << "\n\t\t\t THE MODIFIED SERVICE RECORD : \n" << endl;
+			hospitalClassObj.displayService(position);
+		}
+
+	if(!flag && choice == 1) 
+	{
+		fObj.close();
+		cout << "\n\t\t\t SERVICE RECORD WITH DISEASE DESCRIPTION " << description << " NOT FOUND" << endl <<
+				"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+	else if(!flag && choice == 2) 
+	{
+		fObj.close();
+		cout << "\n\t\t\t SERVICE RECORD WITH DISEASE ID  " << id << " NOT FOUND" << endl << 
+				"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+}
+void hospitalServiceRecord :: deleteService()
+{
+	system("cls");
+	if (!hospitalClassObj.serviceRecordFileCheck())
+	{
+		cout << "\t\t\t NO SERVICES TO DELETE" << endl <<
+				"\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+		return;
+	}
+	system("cls");
+	ifstream inObj("ServiceRecord.bin", ios::in | ios::binary);
+	char description[15];
+	int id;
+	int choice;
+	int flag = false;
+	cout << "\t\t\t ENTER 1 TO DELETE THE SERVICE RECORD BY DISEASE DESCRIPTION " << endl <<  endl
+		 << "\t\t\t ENTER 2 TO DELETE THE PATIENT RECORD BY DISEASE ID  " << endl << endl 
+		 << "\t\t\t ENTER ANY NUMBER KEY TO EXIT"<< "\n\t\t\t YOUR CHOICE : ";
+	cin >> choice;
+	if (choice == 1)
+	{
+		ofstream outObj("duplicate.bin", ios::out | ios::binary);
+		cout << "\t\t\t ENTER DISEASE DESCRIPTION : ";
+		cin >> description;
+		while (inObj.read((char*)&hospitalClassObj, sizeof(hospitalClassObj)))
+		{
+			if (_stricmp(hospitalClassObj.diseaseDescription,description) == 0)
+			{
+				flag = true;
+				cout << "\n\t\t\t SERVICE RECORD WITH DISEASE DESCRIPTION " << description << " FOUND " << endl;
+				cout << "\n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				cout << "\n\t\t\t SERVICE RECORD WITH DISEASE DESCRIPTION  " << description << " SUCCESSFULLY DELETED" <<
+					endl <<"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				continue;
+			}
+			outObj.write((char *)&hospitalClassObj,sizeof(hospitalClassObj));
+		}
+		inObj.close();
+		outObj.close();
+		remove("ServiceRecord.bin");
+		int nu = rename("duplicate.bin","ServiceRecord.bin");
+	}
+	if (choice == 2)
+	{			
+		ofstream outObj("duplicate.bin", ios::out | ios::binary);
+		cout << "\t\t\t ENTER DISEASE ID  : ";
+		cin >> id;
+		while (inObj.read((char*)&hospitalClassObj, sizeof(hospitalClassObj)))
+		{
+			if (hospitalClassObj.diseaseId == id)
+			{
+				flag = true;
+				cout << "\n\t\t\t SERVICE RECORD WITH DISEASE ID " << id << " FOUND " << endl;
+				cout << "\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				cout << "\n\t\t\t SERVICE RECORD WITH DISEASE ID  " << id << " SUCCESSFULLY DELETED" <<
+				endl <<"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				continue;
+			}
+			outObj.write((char *)&hospitalClassObj,sizeof(hospitalClassObj));
+		}
+		inObj.close();
+		outObj.close();
+		remove("ServiceRecord.bin");
+		int nu = rename("duplicate.bin","ServiceRecord.bin");
+	}
+	if(!flag && choice == 1) 
+	{
+		cout << "\n\t\t\t SERVICE RECORD WITH DISEASE DESCRIPTION " << description << " NOT FOUND" << endl <<
+				"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+	else if(!flag && choice == 2) 
+	{
+		cout << "\n\t\t\t SERVICE RECORD WITH DISEASE ID  " << id << " NOT FOUND" << endl << 
+				"\t\t\t PRESS ENTER TO CONTINUE" << endl;
+		_getch();
+	}
+}

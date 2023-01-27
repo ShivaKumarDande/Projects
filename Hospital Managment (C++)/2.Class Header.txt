@@ -1,0 +1,80 @@
+#include"Header.h"
+
+class hospitalServiceRecord
+{
+public:
+	int diseaseId;
+	char docFirstName[15];
+	char docLastName[15];
+	char specialisation[30];
+	char diseaseDescription[20];
+	int specialistRoomNumber;
+	int depositAmount;
+public:
+	void addNewService();
+    void displayServices();
+	void displayService(int);
+	void editService();
+	void deleteService();
+	bool serviceRecordFileCheck();
+};
+
+class patientRecord
+{
+private:
+	char patientId[18];
+	char firstName[15];
+	char lastName[15];
+	struct Address
+		{
+			char plotNumber[10];
+			char roadNumber[15];
+			char cityName[20];
+			char state[20];
+			char pincode[10];
+		};
+	struct Address address;
+	int age;
+	char gender[10];
+	char serviceType[15];
+	struct Date
+	{
+		int day;
+		int month;
+		int year;
+	};
+	struct Date admittedDate,dischargeDate;
+	char docFirstName[15];
+	char docLastName[15];
+	char specialisation[15];
+	char diseaseDescription[20];
+	int specialistRoomNumber;
+	int depositAmount;
+	int treatementAmount;
+	int balanceAmount;
+	int refundAmount;
+	char paymentStatus[10];
+	char refundStatus[15];
+public:
+	void addNewPatientRecord();
+	void searchPatientRecord();
+	void deletePatientRecord();
+	void displayPatientRecord();
+	void editPatientRecord();
+	void editAdmittedPatientRecords();
+	void editDischargedPatientRecords();
+	void displayRecord(int, int);
+	char* getDiseaseDescription(int);
+	int getRoomNumber(int);
+	int getDepositAmount(int);
+	bool dischargedPatientFileCheck();
+	bool admittedPatientFileCheck();
+	void alphabeticalOrderDisplay(int);
+	void emergencyPatientList(int);
+	void OPDPatientList(int);
+	void patientListOfParticularDate(int);
+	void displayAllPatientRecords(int);
+	void dischargePatient();
+};
+
+

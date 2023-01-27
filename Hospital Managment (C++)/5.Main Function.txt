@@ -1,0 +1,119 @@
+#include"classHeader.h"
+
+int main()
+{
+	label :
+	system("cls");
+	int choice, choice1;
+	char password[15];
+	cout << "\n\t\t ********************************************************\n\t\t\t WELCOME TO DSK MULTI-SPECIALITY HOSPITALS\n\t\t "  
+				<< "********************************************************" << endl;
+	cout << "\n\t\t\tENTER"                << endl << 
+		"\t\t\t 1. ADMINISTRATION RECORDS" << endl << 
+		"\t\t\t 2. PATIENT RECORDS"        << endl <<
+		"\t\t\t 3. EXIT"                   << endl <<
+		"\t\t\t YOUR CHOICE : " ;
+	cin >> choice;
+	if(choice == 1)
+	{
+		cout << "\n\t\t\tENTER THE ADMINISTRATION PASSWORD : ";
+		cin >> password;
+		if(!strcmp(password,"ShivaKumar"))
+		{
+			while(true)
+			{
+				system("cls");
+				cout << "\n\t\t ********************************************************\n\t\t\t WELCOME TO DSK MULTI-SPECIALITY HOSPITALS\n\t\t "  
+					<< "********************************************************" << endl;
+				cout << "\t\t\t 1. ADD NEW SERVICE"               << endl <<
+					    "\t\t\t 2. DISPLAY ALL SERVICES PROVIDED" << endl <<
+						"\t\t\t 3. EDIT SERVICE"                  << endl <<
+						"\t\t\t 4. DELETE A SERVICE"              << endl << 
+						"\t\t\t 5. GO BACK TO PREVIOUS MENU"      << endl <<
+						"\t\t\t 6. EXIT"                          << endl << 
+						"\t\t\t YOUR CHOICE : ";
+				cin >> choice1;
+				hospitalServiceRecord hospitalClassObj;
+				switch (choice1)
+				{
+				case 1: 
+					hospitalClassObj.addNewService();
+					break;
+				case 2: 
+					hospitalClassObj.displayServices();
+					break;
+				case 3: 
+					hospitalClassObj.editService();
+					break;
+				case 4:
+					hospitalClassObj.deleteService();
+					break;
+				case 5:
+					goto label;
+				case 6:
+					exit(1);
+				default: cout << "\t\t\t INVALID CHOICE \n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+					_getch();
+					break;
+				}
+			}
+		}
+		if(strcmp(password,"ShivaKumar"))
+		{
+			cout << "\n\t\t\t PASSWORD ENTERED IS INCORRECT \n\t\t\t PRESS ENTER TO CONTINUE";
+			_getch();
+		}
+	}
+	else if(choice == 2)
+	{
+		while (true)
+		{
+			label1 :
+			system("cls");
+			cout << "\n\t\t ********************************************************\n\t\t\t WELCOME TO DSK MULTI-SPECIALITY HOSPITALS\n\t\t "  
+				<< "********************************************************" << endl;
+			cout << "\t\t\t 1. ADD NEW PATIENT"         << endl << 
+				    "\t\t\t 2. DISPLAY PATIENT RECORDS" << endl << 
+					"\t\t\t 3. SEARCH PATIENT RECORD"   << endl <<
+					"\t\t\t 4. EDIT PATIENT RECORD"     << endl <<
+					"\t\t\t 5. DISCHARGE PATIENT"       << endl <<
+					"\t\t\t 6. DELETE PATIENT RECORD"   << endl << 
+					"\t\t\t 7. GO BACK TO PREVIOUS MENU"<< endl <<
+					"\t\t\t 8. EXIT"                    << endl <<
+					"\t\t\t YOUR CHOICE : ";
+			cin >> choice1;
+			patientRecord classObj;
+			switch (choice1)
+			{
+			case 1:
+				classObj.addNewPatientRecord();
+				break;
+			case 2:
+				classObj.displayPatientRecord();
+				break;
+			case 3:
+				classObj.searchPatientRecord();
+				break;
+			case 4:
+				classObj.editPatientRecord();
+				break;
+			case 5:
+				classObj.dischargePatient();
+				break;
+			case 6:
+				classObj.deletePatientRecord();
+				break;
+			case 7:
+				goto label;
+			case 8:
+				exit(1);
+			default: cout << "\t\t\t INVALID CHOICE \n\t\t\t PRESS ENTER TO CONTINUE" << endl;
+				_getch();
+				break;
+			}
+		}
+	}
+	else if(choice == 3)
+		exit(1);
+	return 0;
+}
