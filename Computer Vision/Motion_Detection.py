@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import os
 import cv2 as cv
 import numpy as np
@@ -120,9 +114,13 @@ def apply_gaussian_2D_filter(images, gaussian_filter):
 
 def display(image1, image2, waitTime, name):
     display_images = np.concatenate((image1, image2), axis = 2)
-    for i in display_images:
-        cv.imshow(name, i)
-        cv.waitKey(waitTime)
+#     cv.imshow(name, display_images[140])
+#     cv.waitKey(0)
+#     cv.destroyAllWindows()
+    for i in range(len(display_images)):
+        if i % 10 == 0:
+            cv.imshow(name, display_images[i])
+            cv.waitKey(waitTime)
     cv.destroyAllWindows()
 
 # Function to apply 1D differential Operator on the given 
@@ -153,6 +151,23 @@ def apply_1D_gaussian_operator(images, gaussian_1D_operator, threshold):
     gaussian_result = gaussian_result.astype(np.uint8)
     return gaussian_result, gaussian_1D_mask
 
+def std_deviation(images, title):
+    #standard Deviation
+    std_dev = []
+    std = []
+    for i in images:
+        std_dev.append(np.std(i))  
+    x = list(range(0, 100, 1))
+    std = std_dev[0:100]
+    
+    #plotting std
+    plt.title(title)
+    plt.xlabel("Image Number")
+    plt.ylabel("Standard Deviation")
+    plt.plot(x, std, 'o', color ="red")
+    plt.show()
+
+
 images = []
 gray_scaled_images = []
 threshold = float(input("Enter the Threshold value : "))
@@ -160,16 +175,16 @@ images, n = read_input_images()
 print(f'No of Images in the given path is {n}')
 gray_scaled_images = covert_to_grayScale(images)
 
-#display(images, np.zeros(np.shape(images)), 50, 'Original Images and Gray Scaled Images')
-for i in images:
-    cv.imshow('Input Images', i)
-    cv.waitKey(50)
-cv.destroyAllWindows()
+# #display(images, np.zeros(np.shape(images)), 50, 'Original Images and Gray Scaled Images')
+# for i in images:
+#     cv.imshow('Input Images', i)
+#     cv.waitKey(50)
+# cv.destroyAllWindows()
 
-for i in gray_scaled_images:
-    cv.imshow('Gray Images', i)
-    cv.waitKey(50)
-cv.destroyAllWindows()
+# for i in gray_scaled_images:
+#     cv.imshow('Gray Images', i)
+#     cv.waitKey(50)
+# cv.destroyAllWindows()
 
 sigma = float(input('Enter the sigma Value : '))
 x = np.linspace(-sigma, sigma, 3)
@@ -178,8 +193,12 @@ gaussian_1D_operator = gaussian_derivative(x, sigma)
 
 differential_operator_result, differential_operator_mask = apply_1D_differential_operator(gray_scaled_images, differential_operator, threshold)
 gaussian_result, gaussian_1D_mask = apply_1D_gaussian_operator(gray_scaled_images, gaussian_1D_operator, threshold)
+
 display(differential_operator_mask, gaussian_1D_mask, 50, 'Differential Mask, Gaussian Mask (No Smoothening)')
+std_deviation(differential_operator_result, "differential_operator_result without smoothening")
+
 display(differential_operator_result, gaussian_result, 50, 'Differential Result, Gaussian Result (No Smoothening)')
+std_deviation(gaussian_result, "gaussian_result without smoothening")
 
 # nr = []
 # # concatenate image Horizontally
@@ -203,7 +222,9 @@ while (choice == 'Y' or choice == 'y'):
         differential_operator_result, differential_operator_mask = apply_1D_differential_operator(smoothened_images, differential_operator, threshold)
         gaussian_result, gaussian_1D_mask = apply_1D_gaussian_operator(smoothened_images, gaussian_1D_operator, threshold)
         display(differential_operator_mask, gaussian_1D_mask, 50, 'Differential Mask, Gaussian Mask (Smoothening)')
+        std_deviation(differential_operator_result, "differential_operator_result with box smoothening")
         display(differential_operator_result, gaussian_result, 50, 'Differential Result, Gaussian Result (Smoothening)')
+        std_deviation(gaussian_result, "gaussian_result with box smoothening")
 
     elif (c == 2):
         ksize = int(input("Enter the 2D Gaussian Filter Size : "))
@@ -214,9 +235,10 @@ while (choice == 'Y' or choice == 'y'):
         differential_operator_result, differential_operator_mask = apply_1D_differential_operator(smoothened_images, differential_operator, threshold)
         gaussian_result, gaussian_1D_mask = apply_1D_gaussian_operator(smoothened_images, gaussian_1D_operator, threshold)
         display(differential_operator_mask, gaussian_1D_mask, 50, 'Differential Mask, Gaussian Mask (Smoothening)')
+        std_deviation(differential_operator_result, "differential_operator_result with Gaussian smoothening")
         display(differential_operator_result, gaussian_result, 50, 'Differential Result, Gaussian Result (Smoothening)')
+        std_deviation(gaussian_result, "gaussian_result with Gaussian smoothening")
 
     choice = input("Do you want to smoothen the input Images : \n Enter Y or N : ")
 
 print('Thank You!')
-
